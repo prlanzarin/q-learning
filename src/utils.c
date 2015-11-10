@@ -6,7 +6,7 @@
 #include <string.h>
 
 int states_parse(char *buffer, MATRIX *matrix, int row);
-int values_parse(char *buffer, MATRIX *matrix, int row);
+int values_parse(char *buffer, MATRIX *matrix, int row, float default_value);
 
 /* Parse the number of rows that the matrix in 'filename' has */
 int UTILS_parse_rows(char *filename) {
@@ -37,7 +37,7 @@ int UTILS_parse_cols(char *filename) {
 	}
 
 	fgets(buffer, sizeof(buffer), file);
-	
+
 	if(fscanf(file, "C=%d\n", &cols)) {
 		fclose(file);
 		return cols;
@@ -47,8 +47,30 @@ int UTILS_parse_cols(char *filename) {
 		return -1;
 	}
 }
+
+float UTILS_parse_default_value(char *filename) {
+	float default_value;
+	FILE *file;
+	char buffer[256];
+	if((file = fopen(filename,"r")) == NULL) {
+		fprintf(stderr, "ERROR: could not open %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+    fgets(buffer, sizeof(buffer), file);
+    fgets(buffer, sizeof(buffer), file);
+
+	if(fscanf(file, "D=%f\n", &default_value)) {
+		fclose(file);
+		return default_value;
+	}
+	else {
+		fclose(file);
+		return -1;
+	}
+}
+
 /* Parses the grid world from 'filename' to 'matrix' of type MATRIX */
-int UTILS_parse_grid_world(char *filename, MATRIX *matrix) {
+int UTILS_parse_grid_world(char *filename, MATRIX *matrix, float default_value) {
 	int row_count = 0;
 	char *buffer, line[256];
 	FILE *file;
@@ -61,18 +83,20 @@ int UTILS_parse_grid_world(char *filename, MATRIX *matrix) {
 
 	fgets(line, sizeof(line), file);
 	fgets(line, sizeof(line), file);
+	fgets(line, sizeof(line), file);
 
 	buffer = (char *) malloc(line_size);
-	
+
 	while((fgets(buffer, line_size, file)) != NULL && row_count < matrix->r) {
 		/* grid processing */
 		states_parse(buffer, matrix, row_count);
 		row_count++;
 	}
 	row_count = 0;
+
 	while((fgets(buffer, line_size, file)) != NULL && row_count < matrix->r) {
 		/* grid processing */
-		values_parse(buffer, matrix, row_count);
+		values_parse(buffer, matrix, row_count, default_value);
 		row_count++;
 	}
 
@@ -126,16 +150,16 @@ int states_parse(char *buffer, MATRIX *matrix, int row) {
 }
 
 /* Auxiliary subroutine to parse a 'row' of grid states in a safe way */
-int values_parse(char *buffer, MATRIX *matrix, int row) {
+int values_parse(char *buffer, MATRIX *matrix, int row, float default_value) {
 	char *delim = " ";
 	char *tok_buf;
 	int col_count = 0;
 
 	tok_buf = strtok(buffer, delim);
 	while (tok_buf != NULL) {
-		if(*tok_buf == 'D')
-			matrix->matrix[row][col_count].value = DEFAULT_VALUE; 
-
+		if(*tok_buf == 'D'){
+			matrix->matrix[row][col_count].value = default_value;
+		}
 		else
 			matrix->matrix[row][col_count].value = atof(tok_buf);
 		col_count++;
