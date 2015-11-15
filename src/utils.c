@@ -9,64 +9,25 @@ int states_parse(char *buffer, MATRIX *matrix, int row);
 int values_parse(char *buffer, MATRIX *matrix, int row, float default_value);
 
 /* Parse the number of rows that the matrix in 'filename' has */
-int UTILS_parse_rows(char *filename) {
-	int rows;
+
+int UTILS_parse_parameters(char *filename, int *rows, int *cols, 
+		float *def_value) {
 	FILE *file;
 	if((file = fopen(filename,"r")) == NULL) {
 		fprintf(stderr, "ERROR: could not open %s\n", filename);
 		exit(EXIT_FAILURE);
 	}
 
-	if(fscanf(file, "L=%d\n", &rows)) {
+	if(fscanf(file, "L=%d\n", rows) && fscanf(file, "C=%d\n", cols) &&
+			fscanf(file, "D=%f\n", def_value)) {
 		fclose(file);
-		return rows;
+		return 0;
 	}
 	else {
 		fclose(file);
 		return -1;
 	}
-}
-/* Parse the number of columns that the matrix in 'filename' has */
-int UTILS_parse_cols(char *filename) {
-	int cols;
-	FILE *file;
-	char buffer[256];
-	if((file = fopen(filename,"r")) == NULL) {
-		fprintf(stderr, "ERROR: could not open %s\n", filename);
-		exit(EXIT_FAILURE);
-	}
 
-	fgets(buffer, sizeof(buffer), file);
-
-	if(fscanf(file, "C=%d\n", &cols)) {
-		fclose(file);
-		return cols;
-	}
-	else {
-		fclose(file);
-		return -1;
-	}
-}
-
-float UTILS_parse_default_value(char *filename) {
-	float default_value;
-	FILE *file;
-	char buffer[256];
-	if((file = fopen(filename,"r")) == NULL) {
-		fprintf(stderr, "ERROR: could not open %s\n", filename);
-		exit(EXIT_FAILURE);
-	}
-    fgets(buffer, sizeof(buffer), file);
-    fgets(buffer, sizeof(buffer), file);
-
-	if(fscanf(file, "D=%f\n", &default_value)) {
-		fclose(file);
-		return default_value;
-	}
-	else {
-		fclose(file);
-		return -1;
-	}
 }
 
 /* Parses the grid world from 'filename' to 'matrix' of type MATRIX */
@@ -95,7 +56,7 @@ int UTILS_parse_grid_world(char *filename, MATRIX *matrix, float default_value) 
 	row_count = 0;
 
 	while((fgets(buffer, line_size, file)) != NULL && row_count < matrix->r) {
-		/* grid processing */
+		/* values processing */
 		values_parse(buffer, matrix, row_count, default_value);
 		row_count++;
 	}

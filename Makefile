@@ -10,7 +10,10 @@ BIN_DIR=./bin
 SRC_DIR=./src
 EXE = ./bin # TODO arrumar essa porcaria
 
-all: utils.o matrix.o
+all: agent
+
+agent: $(INC_DIR)/agent.h $(SRC_DIR)/agent.c utils.o matrix.o 
+	$(CC) $(DEBUG) -o $(BIN_DIR)/agent $(SRC_DIR)/agent.c $(BIN_DIR)/*.o $(CFLAGS)
 
 utils.o: $(INC_DIR)/utils.h $(INC_DIR)/agent.h $(SRC_DIR)/utils.c matrix.o
 	mkdir -p $(BIN_DIR) && $(CC) $(DEBUG) -c -o $(BIN_DIR)/utils.o $(SRC_DIR)/utils.c $(CFLAGS) 
