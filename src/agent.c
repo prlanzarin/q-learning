@@ -8,21 +8,19 @@
 int main(){
 
 	int cols = 0, rows = 0;
-	float default_value = 0.0;
 	int i,j;
 	char filename[12] = "entrada.txt";
 	MATRIX *matrix;
 
 
-	UTILS_parse_parameters(filename, &rows, &cols, &default_value);
-	if(default_value == -1){
+	if(UTILS_parse_parameters(filename, &rows, &cols, &DEFAULT_VALUE) < 0){
 		return 0;
 	}
-	printf("rows: %d cols: %d default value: %f\n", rows, cols, default_value);
+	printf("rows: %d cols: %d default value: %f\n", rows, cols, DEFAULT_VALUE);
 
 	matrix = MATRIX_new(rows, cols);
 
-	UTILS_parse_grid_world(filename, matrix, default_value);
+	UTILS_parse_grid_world(filename, matrix, DEFAULT_VALUE);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
 			printf("state: %c v: %0.2f ", matrix->matrix[i][j].state,

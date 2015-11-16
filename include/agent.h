@@ -1,6 +1,6 @@
 #ifndef __agent__
 #define __agent__
 
-#define DEFAULT_VALUE  1
+float DEFAULT_VALUE = 1.0;
 
 #endif
