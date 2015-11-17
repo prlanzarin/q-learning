@@ -33,3 +33,46 @@ int main(){
 
 	return 0;
 }
+
+AGENT *AGENT_new(int nof_states) {
+	int i;
+	AGENT *new_ag = (AGENT *)malloc(sizeof(AGENT));
+	if((new_ag->Q = malloc(nof_states * sizeof(float *))) == NULL)
+		return NULL;
+	for(i = 0; i < nof_states; i++) {
+		if((new_ag->Q[i] = malloc(NOF_ACTIONS * sizeof(float))) == NULL)
+			return NULL;
+	}
+	return new_ag;
+}
+
+int AGENT_move(AGENT *agent, MATRIX *world, int action) {
+	switch(action) {
+		case LEFT:
+			if(AGENT_change_pos(agent, world, (agent->posx--),
+						(agent->posy)) < 0)
+				// invalid move
+			break;
+		case RIGHT:
+			if(AGENT_change_pos(agent, world, (agent->posx++),
+						(agent->posy)) < 0)
+				// invalid move
+			break;
+		case UP:
+			if(AGENT_change_pos(agent, world, (agent->posx),
+						(agent->posy++)) < 0)
+				// invalid move
+			break;
+		case DOWN:
+			if(AGENT_change_pos(agent, world, (agent->posx--),
+						(agent->posy--)) < 0)
+				// invalid move
+			break;
+	}
+	return 0;
+}
+
+int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
+	return -1;
+}
+
