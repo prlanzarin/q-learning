@@ -10,7 +10,7 @@ int values_parse(char *buffer, MATRIX *matrix, int row, float default_value);
 
 /* Parse the number of rows that the matrix in 'filename' has */
 
-int UTILS_parse_parameters(char *filename, int *rows, int *cols, 
+int UTILS_parse_parameters(char *filename, int *rows, int *cols,
 		float *def_value) {
 	FILE *file;
 	if((file = fopen(filename,"r")) == NULL) {
