@@ -67,10 +67,13 @@ int choose_action(AGENT *agent, MATRIX *world, int alfa){
 	}else{
 		for(i=0; i<NOF_ACTIONS; i++){
 			AGENT_move(agent, world, i);
+			// TODO: we need to check if movement is invalid
+			// (move returns -1)
 			if(world->matrix[agent->posx][agent->posy].value > max){
 				action = i;
 				max = world->matrix[agent->posx][agent->posy].value;
 			}
+			AGENT_unmove(agent, world, i);
 		}
 	}
 	return action;
@@ -125,10 +128,51 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 	return 0;
 }
 
-int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
-	// checking boundaries
-	if(MATRIX_out_of_bounds(world, newx, newy))
-			return -1;
+int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
+	switch(action) {
+		case LEFT:
+			if(AGENT_change_pos(agent, world, (agent->posx + 1),
+						agent->posy) < 0)
+				return -1; // invalid move
+			
+				break;
+		case RIGHT:
+			if(AGENT_change_pos(agent, world, (agent->posx - 1),
+						agent->posy) < 0)
+				return -1; // invalid move
+
+				break;
+		case UP:
+			if(AGENT_change_pos(agent, world, agent->posx,
+						(agent->posy - 1)) < 0)
+				return -1; // invalid move
+
+				break;
+		case DOWN:
+			if(AGENT_change_pos(agent, world, agent->posx,
+						(agent->posy + 1)) < 0)
+				return -1; // invalid move
+
+				break;
+	}
 	return 0;
 }
+
+
+int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
+	// checking boundaries and walls
+	if(MATRIX_out_of_bounds(world, newx, newy) ||
+			AGENT_is_wall( world, newx, newy));
+			return -1;
+
+	// changing agent position
+	agent->posx = newx; agent->posy = newy;
+	
+	return 0;
+}
+
+int AGENT_is_wall(MATRIX *world, int newx, int newy) {
+	return (world->matrix[newx][newy].state == 'X');
+}
+
 

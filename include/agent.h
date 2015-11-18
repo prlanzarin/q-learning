@@ -23,8 +23,11 @@ void AGENT_free(AGENT *agent);
 
 int AGENT_move(AGENT *agent, MATRIX *world, int action);
 
+int AGENT_unmove(AGENT *agent, MATRIX *world, int action);
+
 int choose_action(AGENT *agent, MATRIX *world, int alfa);
 
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy);
 
+int AGENT_is_wall(MATRIX *world, int newx, int newy);
 #endif
