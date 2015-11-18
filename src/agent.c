@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include "../include/matrix.h"
 #include "../include/utils.h"
@@ -33,7 +34,44 @@ int main(){
 
 	return 0;
 }
+//TODO: colocar while(goal = 1, ou -1)
+void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma){
+    int action;
+    char state, new_state;
+    float reward = 0, maxQ = 0;
+    agent->posx = 1;
+    agent->posy = 1;
 
+    state = world->matrix[agent->posx][agent->posy].state;
+    // recompensa estado atual
+    reward = world->matrix[agent->posx][agent->posy].value;
+    action = choose_action(agent, world, alfa);
+    // depois de escolher a ação, as posições apontam para novo estado
+    new_state = world->matrix[agent->posx][agent->posy].state;
+
+    // maxQ = ... melhor recompensa das ações disponíveis no new_state
+
+    //nao sei se o estado vai ser um char ou outra coisa
+    agent->Q[state][action] = (1-alfa) * agent->Q[state][action] + alfa*(reward + gamma * maxQ );
+
+
+}
+int choose_action(AGENT *agent, MATRIX *world, int alfa){
+    int action, i;
+    float max = 0.0;
+    if ( RAND < alfa){
+        action = rand() % NOF_ACTIONS;
+    }else{
+        for(i=0; i<NOF_ACTIONS; i++){
+            AGENT_move(agent, world, i);
+            if(world->matrix[agent->posx][agent->posy].value > max){
+                    action = i;
+                    max = world->matrix[agent->posx][agent->posy].value;
+            }
+        }
+    }
+    return action;
+}
 AGENT *AGENT_new(int nof_states) {
 	int i;
 	AGENT *new_ag = (AGENT *)malloc(sizeof(AGENT));
@@ -73,6 +111,7 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 }
 
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
+    //verificar parede?
 	return -1;
 }
 
