@@ -129,6 +129,10 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 	return 0;
 }
 
+/*
+ * Resets the agent move that was made by <action>. E.G.: if we want to go back
+ * on a LEFT action, we should call AGENT_unmove(agent, world, LEFT)
+ */
 int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 	switch(action) {
 		case LEFT:
@@ -159,7 +163,11 @@ int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 	return 0;
 }
 
-
+/*
+ * Returns -1 if next position (newx, newy) is invalid and does not alter the
+ * agent's position.
+ * If the movement is valid, update agent's position and returns 0
+ */
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 	// checking boundaries and walls
 	if(MATRIX_out_of_bounds(world, newx, newy) ||
@@ -172,10 +180,17 @@ int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 	return 0;
 }
 
+/* 
+ * Checks if position (newx, newy) is a wall ('X' char). Returns 1 if so, else 0
+ */
 int AGENT_is_wall(MATRIX *world, int newx, int newy) {
 	return (world->matrix[newx][newy].state == 'X');
 }
 
+/*
+ * Resets agent's attributes (position to (1,1), QTable has all of its
+ * values set to zero
+ */
 void AGENT_reset(AGENT *agent) {
 	int i;
 	agent->posx = agent->posy = 1;
@@ -184,4 +199,13 @@ void AGENT_reset(AGENT *agent) {
 					NOF_ACTIONS * sizeof(float));
 
 	return;
+}
+
+/* Agent deallocator */
+void AGENT_free(AGENT *agent) {
+	int i;
+	for(i = 0; i < agent->nof_states; i++)
+			free((void *) agent->Q[i]);
+	free((void *) agent->Q);
+	free((void *) agent);
 }
