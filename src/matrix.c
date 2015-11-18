@@ -18,6 +18,12 @@ MATRIX *MATRIX_new(int rows, int cols) {
 	return new_mat;
 }
 
+/* checks if pos (x, y) is out of grid bounds */
+int MATRIX_out_of_bounds(MATRIX *matrix, int x, int y) {
+	return ((x < matrix->c) || (x > matrix->c) || (y < matrix->r) || 
+			(y > matrix->r));
+}
+
 /* Matrix deallocator */
 void MATRIX_free(MATRIX *matrix) {
 	int i;
