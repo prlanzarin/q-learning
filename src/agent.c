@@ -189,7 +189,7 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy) {
 
 /*
  * Resets agent's attributes (position to (1,1), QTable has all of its
- * values set to zero
+ * values set to zero)
  */
 void AGENT_reset(AGENT *agent) {
 	int i;
@@ -209,3 +209,4 @@ void AGENT_free(AGENT *agent) {
 	free((void *) agent->Q);
 	free((void *) agent);
 }
+

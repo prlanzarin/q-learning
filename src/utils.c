@@ -118,11 +118,12 @@ int values_parse(char *buffer, MATRIX *matrix, int row, float default_value) {
 
 	tok_buf = strtok(buffer, delim);
 	while (tok_buf != NULL) {
-		if(*tok_buf == 'D'){
+		if(tok_buf[0] == 'D'){
 			matrix->matrix[row][col_count].value = default_value;
 		}
-		else
-			matrix->matrix[row][col_count].value = atof(tok_buf);
+		else 
+			matrix->matrix[row][col_count].value = strtof(tok_buf,
+				       	NULL);
 		col_count++;
 		tok_buf = strtok(NULL, delim);
 	}
