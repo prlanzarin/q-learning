@@ -55,7 +55,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float defa
 		//printf("acao: %d\n", action);
 
 		AGENT_move(agent, world, action);
-		//printf("nova posicao %d %d \n", agent->col, agent->row);
+		//printf("nova posicao %d %d \n", agent->row, agent->col);
 		new_state = (agent->row) * world->r + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
 		//printf("best action %d \n", best_action);
@@ -63,7 +63,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float defa
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		//printf("posicão: %d, %d - valor Q: %f \n",  x, y, agent->Q[state][action]);
+		printf("posicão: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
 }
 
@@ -72,7 +72,7 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	float max = default_value -0.1;
 	for(i=0; i<NOF_ACTIONS; i++){
 		if(AGENT_move(agent, world, i) != -1){
-                printf("%d %d\n",agent->col, agent->row );
+                printf("%d %d\n", agent->row,agent->col);
 			if(world->matrix[agent->row][agent->col].value >= max ||
 					world->matrix[agent->row][agent->col].value != 0.0){
 				action = i;
@@ -144,10 +144,6 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 			if(AGENT_change_pos(agent, world, agent->col,
 						(agent->row - 1)) < 0)
 				return -1; // invalid move
-
-
-				printf("saiu do up %d %d\n", agent->col, agent->row);
-
 			break;
 		case DOWN:
 			if(AGENT_change_pos(agent, world, agent->col,
@@ -191,9 +187,9 @@ int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 	// checking boundaries and walls
-	printf("%d - %d\n", newx, newy);
-	printf("bordas %d \n",MATRIX_out_of_bounds(world, newx, newy ));
-	printf("parede %d \n",AGENT_is_wall( world, newx, newy) );
+	//printf("%d - %d\n", newy, newx );
+	//printf("bordas %d \n",MATRIX_out_of_bounds(world, newx, newy ));
+	//printf("parede %d \n",AGENT_is_wall( world, newx, newy) );
 	if(MATRIX_out_of_bounds(world, newx, newy) ||
 			AGENT_is_wall( world, newx, newy)){
 		return -1;

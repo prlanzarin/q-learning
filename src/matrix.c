@@ -20,7 +20,7 @@ MATRIX *MATRIX_new(int rows, int cols) {
 
 /* checks if pos (x, y) is out of grid bounds */
 int MATRIX_out_of_bounds(MATRIX *matrix, int x, int y) {
-	return ((x < 0) || (x > matrix->c) || (y < 0) || (y > matrix->r));
+	return ((x < 0) || (x >= matrix->c) || (y < 0) || (y >= matrix->r));
 }
 
 /* Matrix deallocator */
