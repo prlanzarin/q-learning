@@ -50,7 +50,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 	while(reward == default_value || reward == 0)  {
 
-		state = (agent->row) * world->r + (agent->col);
+		state = (agent->row) * world->c + (agent->col);
 		col = agent->col;
 		row  = agent->row;
 		reward = world->matrix[row][col].value;
@@ -59,10 +59,9 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 		AGENT_move(agent, world, action);
 		//printf("nova posicao %d %d \n", agent->row, agent->col);
-		new_state = (agent->row) * world->r + (agent->col);
+		new_state = (agent->row) * world->c + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
 		//printf("best action %d \n", best_action);
-		//TODO: arrumar estado
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
