@@ -12,7 +12,7 @@ AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0;
 float _default_value = 0.0;
-float _alpha, _gamma, _eps;
+float _alpha, _gamma, _eps, _trainings;
 FILE *saida;
 
 int main(int argc, char **argv){
@@ -20,7 +20,7 @@ int main(int argc, char **argv){
 	
 	saida= fopen("saida.txt", "wt");
 
-	//UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps);
+	//UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps, &_trainings);
 
 	UTILS_parse_parameters("entrada.txt", &rows, &cols, &_default_value);
 	if(_default_value == -1){
@@ -57,7 +57,6 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 		state = (agent->row) * world->c + (agent->col);
 		iterator++;
-		state = (agent->row) * world->r + (agent->col);
 		col = agent->col;
 		row  = agent->row;
 		reward = world->matrix[row][col].value;
