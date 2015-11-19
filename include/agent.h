@@ -5,6 +5,7 @@
 #define DEFAULT_VALUE  1
 #define NOF_ACTIONS 4
 #define RAND ((float)(rand())/(float)(RAND_MAX) )
+
 typedef enum action {
         LEFT,
         RIGHT,

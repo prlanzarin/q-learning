@@ -12,10 +12,12 @@ AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0;
 float _default_value = 0.0;
+float _alpha, _gamma, _eps;
 
-int main(){
+int main(int argc, char **argv){
+	int i, j;
 
-	int i,j;
+	UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps);
 
 	UTILS_parse_parameters(FILENAME, &rows, &cols, &_default_value);
 	if(_default_value == -1){
@@ -36,6 +38,7 @@ int main(){
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
 	Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
+	_bebezao->col = _bebezao->row = 0;
 
 	return 0;
 }
@@ -65,7 +68,6 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 		printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
-	printf("fim");
 }
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value){

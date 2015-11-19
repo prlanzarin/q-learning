@@ -8,6 +8,24 @@
 int states_parse(char *buffer, MATRIX *matrix, int row);
 int values_parse(char *buffer, MATRIX *matrix, int row, float default_value);
 
+int UTILS_parse_args(int argc, char **argv, float *alpha, float *gamma, float *eps) {
+
+	if(argc == NOF_ARGS) {
+		if(!sscanf(argv[1], "%f", alpha) || !sscanf(argv[2], "%f", gamma) ||
+				!sscanf(argv[3], "%f", eps)) {
+			fprintf(stderr, 
+				"ERROR: argument could not be parsed.\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else {
+		fprintf(stderr,
+			"ERROR: invalid number of arguments. EXPECTS alpha gamma epsilon.\n");
+		exit(EXIT_FAILURE);
+	}
+	return 0;
+}
+
 /* Parse the number of rows that the matrix in 'filename' has */
 
 int UTILS_parse_parameters(char *filename, int *rows, int *cols,
