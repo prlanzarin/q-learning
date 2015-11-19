@@ -5,7 +5,7 @@
 #include "../include/matrix.h"
 #include "../include/utils.h"
 #include "../include/agent.h"
-
+#include <unistd.h>
 #define FILENAME "entrada.txt"
 
 AGENT *_bebezao;
@@ -40,11 +40,11 @@ int main(int argc, char **argv){
 		printf("\n");
 	}
 
-	_bebezao = AGENT_new(_grid->r * _grid->c);
+	_bebezao = AGENT_new(_grid->r * _grid->c, _grid->r -1, 0);
 	for(i = 0;  i <  _trainings ; i++) {
 		Q_learning(_bebezao, _grid, _alpha, _gamma, _eps, _default_value);
 		fprintf(saida, "Fim da rodada \n\n");
-		AGENT_reset(_bebezao, 0);
+		AGENT_reset(_bebezao, 0, _grid->r -1, 0);
 	}
 	fclose(saida);
 	return 0;
@@ -54,7 +54,6 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 	int action, best_action, col, row;
 	int state, new_state, iterator = 0;
 	float reward = 0;
-
 	while(reward == default_value || reward == 0)  {
 
 		state = (agent->row) * world->c + (agent->col);
@@ -72,21 +71,25 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		//printf("best action %d \n", best_action);
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
-        fprintf(saida, "Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
 
+        printf("Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
+	sleep(0.5);
 	}
 	fprintf(saida, "Número de iterações: %d\n", iterator);
 }
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
-	int action = -1000, i;
-	float max = default_value -0.1;
+	int action = -1000, i, state;
+	float max = 0.0;
+
 	for(i=0; i<NOF_ACTIONS; i++){
 		if(AGENT_move(agent, world, i) != -1){
-			if(world->matrix[agent->row][agent->col].value >= max ||
-					world->matrix[agent->row][agent->col].value != 0.0){
+			state = (agent->row) * world->c + (agent->col);
+
+			if( agent->Q[state][i] >= max ||
+					agent->Q[state][i] != 0.0){
 				action = i;
-				max = world->matrix[agent->row][agent->col].value;
+				max = agent->Q[state][action];
 				//printf("posicao gerada pelo best action %d %d \n", agent->row ,agent->col);
 			}
 			AGENT_unmove(agent, world, i);
@@ -96,28 +99,53 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 }
 
 int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_value){
-	int action = -1000, i;
-	float max = default_value -0.1;
-	if ( RAND < epsilon){
-		action = rand() % NOF_ACTIONS;
-
-	}else {
+	int action = -1000, i, state;
+	float max = 0.0;
+	{
 		for(i=0; i<NOF_ACTIONS; i++){
 			if(AGENT_move(agent, world, i) != -1) {
-				if(world->matrix[agent->row][agent->col].value >= max
-						&& world->matrix[agent->row][agent->col].value != 0.0) {
+				state = (agent->row) * world->c + (agent->col);
+				//printf("move is valid -> %d\n", i);
+				if( agent->Q[state][i] >= max ||
+						agent->Q[state][i] != 0.0){
 					action = i;
-					max = world->matrix[agent->row][agent->col].value;
+					max = agent->Q[state][action];
 				}
 				AGENT_unmove(agent, world, i);
 			}
 		}
 	}
+	float randi;
+	if ( (randi = RAND) < epsilon) {
+		switch(action) {
+			case LEFT:
+			case RIGHT:
+				if(RAND <= 0.5)
+					action = UP;	
+				else
+					action = DOWN;
+				break;
+			case UP:
+			case DOWN:
+				if(RAND <= 0.5)
+					action = LEFT;	
+				else
+					action = RIGHT;
+				break;
+
+		}
+		if(AGENT_move(agent, world, action) == -1)
+			return STAY;
+
+		AGENT_unmove(agent, world, action);
+
+	}
+
 	return action;
 }
 
 /* agent allocator, sets x,y to (0, 0) and a zero-filled Q-table */
-AGENT *AGENT_new(int nof_states) {
+AGENT *AGENT_new(int nof_states, int st_row, int st_col) {
 	int i;
 	AGENT *new_ag = (AGENT *)malloc(sizeof(AGENT));
 	if((new_ag->Q = malloc(nof_states * sizeof(float *))) == NULL)
@@ -127,7 +155,8 @@ AGENT *AGENT_new(int nof_states) {
 			return NULL;
 	}
 
-	new_ag->col = new_ag->row = 0;
+	new_ag->row = st_row;
+	new_ag->col = st_col;
 	return new_ag;
 }
 
@@ -159,8 +188,10 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 			if(AGENT_change_pos(agent, world, agent->col,
 						(agent->row + 1)) < 0)
 				return -1; // invalid move
-
 			break;
+		case STAY:
+			break;
+
 	}
 	return 0;
 }
@@ -188,7 +219,8 @@ int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 			if(AGENT_change_pos(agent, world, agent->col,
 						(agent->row - 1)) < 0)
 				return -1; // invalid move
-
+			break;
+		case STAY:
 			break;
 	}
 	return 0;
@@ -220,9 +252,10 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy) {
  * Resets agent's attributes (position to (1,1), QTable has all of its
  * values set to zero if reset_table = 1)
  */
-void AGENT_reset(AGENT *agent, int reset_table) {
+void AGENT_reset(AGENT *agent, int reset_table, int rs_row, int rs_col) {
 	int i;
-	agent->col = agent->row = 0;
+	agent->row = rs_row;
+	agent->col = rs_col;
 	if(reset_table) {
 		for(i = 0; i < agent->nof_states; i++)
 			memset((void *) agent->Q[i], 0,
