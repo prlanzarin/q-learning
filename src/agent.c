@@ -10,9 +10,9 @@
 
 AGENT *_bebezao;
 MATRIX *_grid;
-int cols = 0, rows = 0;
+int cols = 0, rows = 0, _trainings = 100;
 float _default_value = 0.0;
-float _alpha, _gamma, _eps, _trainings;
+float _alpha = 0.7, _gamma = 0.8, _eps = 0.2;
 FILE *saida;
 
 int main(int argc, char **argv){
@@ -20,7 +20,8 @@ int main(int argc, char **argv){
 
 	saida= fopen("saida.txt", "wt");
 
-	//UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps, &_trainings);
+	if(argc > 1)
+		UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps, &_trainings);
 
 	UTILS_parse_parameters("entrada.txt", &rows, &cols, &_default_value);
 	if(_default_value == -1){
@@ -40,8 +41,8 @@ int main(int argc, char **argv){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	for(i = 0;  i < 500; i++) {
-		Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
+	for(i = 0;  i <  _trainings ; i++) {
+		Q_learning(_bebezao, _grid, _alpha, _gamma, _eps, _default_value);
 		fprintf(saida, "Fim da rodada \n\n");
 		AGENT_reset(_bebezao, 0);
 	}
