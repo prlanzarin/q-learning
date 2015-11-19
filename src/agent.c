@@ -35,7 +35,7 @@ int main(){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	Q_learning(_bebezao, _grid, 0.5, 0.8, _default_value);
+	Q_learning(_bebezao, _grid, 0.2, 0.8, _default_value);
 	AGENT_free(_bebezao);
 
 	return 0;
@@ -47,23 +47,23 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float defa
 	float reward = 0;
 
 	while(reward != default_value || reward != 0)  {
-		state = (agent->posx - 1) * world->r + (agent->posy-1);
+		state = (agent->posx) * world->r + (agent->posy);
 		x = agent->posx;
 		y = agent->posy;
 		reward = world->matrix[x][y].value;
 		action = choose_action(agent, world, alfa, default_value);
-		printf("acao: %d\n", action);
+		//printf("acao: %d\n", action);
 
 		AGENT_move(agent, world, action);
-		printf("nova posicao %d %d \n", agent->posx, agent->posy);
-		new_state = (agent->posx - 1) * world->r + (agent->posy-1);
+		//printf("nova posicao %d %d \n", agent->posx, agent->posy);
+		new_state = (agent->posx) * world->r + (agent->posy);
 		best_action = choose_best_action(agent, world, default_value);
-		printf("best action %d \n", best_action);
+		//printf("best action %d \n", best_action);
 		//TODO: arrumar estado
-		agent->Q[state][action] = (1-alfa) * agent->Q[0][action] +
+		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		printf("posicão: %d, %d - valor Q: %f \n",  x, y, agent->Q[state][action]);
+		//printf("posicão: %d, %d - valor Q: %f \n",  x, y, agent->Q[state][action]);
 	}
 }
 
@@ -72,10 +72,11 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	float max = default_value -0.1;
 	for(i=0; i<NOF_ACTIONS; i++){
 		if(AGENT_move(agent, world, i) != -1){
-			if(world->matrix[agent->posx-1][agent->posy-1].value >= max ||
-					world->matrix[agent->posx-1][agent->posy-1].value != 0.0){
+                printf("%d %d\n",agent->posx, agent->posy );
+			if(world->matrix[agent->posx][agent->posy].value >= max ||
+					world->matrix[agent->posx][agent->posy].value != 0.0){
 				action = i;
-				max = world->matrix[agent->posx-1][agent->posy-1].value;
+				max = world->matrix[agent->posx][agent->posy].value;
 				//printf("posicao gerada pelo best action %d %d \n", agent->posx,agent->posy);
 			}
 			AGENT_unmove(agent, world, i);
@@ -93,10 +94,10 @@ int choose_action(AGENT *agent, MATRIX *world, float alfa, float default_value){
 	}else {
 		for(i=0; i<NOF_ACTIONS; i++){
 			if(AGENT_move(agent, world, i) != -1) {
-				if(world->matrix[agent->posx-1][agent->posy-1].value >= max
-						&& world->matrix[agent->posx-1][agent->posy-1].value != 0.0) {
+				if(world->matrix[agent->posx][agent->posy].value >= max
+						&& world->matrix[agent->posx][agent->posy].value != 0.0) {
 					action = i;
-					max = world->matrix[agent->posx-1][agent->posy-1].value;
+					max = world->matrix[agent->posx][agent->posy].value;
 				}
 				AGENT_unmove(agent, world, i);
 			}
@@ -116,7 +117,7 @@ AGENT *AGENT_new(int nof_states) {
 			return NULL;
 	}
 
-	new_ag->posx = new_ag->posy = 1;
+	new_ag->posx = new_ag->posy = 0;
 	return new_ag;
 }
 
@@ -143,6 +144,9 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 			if(AGENT_change_pos(agent, world, agent->posx,
 						(agent->posy + 1)) < 0)
 				return -1; // invalid move
+
+
+				printf("saiu do up %d %d\n", agent->posx, agent->posy);
 
 			break;
 		case DOWN:
@@ -187,6 +191,9 @@ int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 	// checking boundaries and walls
+	printf("%d - %d\n", newx, newy);
+	printf("bordas %d \n",MATRIX_out_of_bounds(world, newx, newy ));
+	printf("parede %d \n",AGENT_is_wall( world, newx, newy) );
 	if(MATRIX_out_of_bounds(world, newx, newy) ||
 			AGENT_is_wall( world, newx, newy)){
 		return -1;
@@ -198,9 +205,9 @@ int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 }
 
 int AGENT_is_wall(MATRIX *world, int newx, int newy) {
-	if(newx == 0 || newy ==0 )
+	if(newx < 0 || newy < 0 || newx >= rows || newy >= cols)
 		return 0;
-	return (world->matrix[newx-1][newy-1].state == 'X');
+	return (world->matrix[newx][newy].state == 'X');
 }
 
 /*
