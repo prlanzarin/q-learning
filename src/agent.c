@@ -45,12 +45,16 @@ int main(int argc, char **argv){
 
 void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsilon, float default_value){
 	int action, best_action, col, row;
-	int state, new_state;
+	int state, new_state, iterator = 0;
 	float reward = 0;
+	FILE *saida;
+	saida= fopen("saida.txt", "wt");
 
 	while(reward == default_value || reward == 0)  {
 
 		state = (agent->row) * world->c + (agent->col);
+		iterator++;
+		state = (agent->row) * world->r + (agent->col);
 		col = agent->col;
 		row  = agent->row;
 		reward = world->matrix[row][col].value;
@@ -65,7 +69,8 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
+		fprintf(saida, "Iteração: %d Posição: (%d,%d) Valor: %.2f\n", iterator,row, col, agent->Q[state][action]);
+		//printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
 }
 
