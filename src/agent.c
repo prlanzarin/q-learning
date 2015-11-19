@@ -20,9 +20,9 @@ int main(int argc, char **argv){
 	
 	saida= fopen("saida.txt", "wt");
 
-	UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps);
+	//UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps);
 
-	UTILS_parse_parameters(FILENAME, &rows, &cols, &_default_value);
+	UTILS_parse_parameters("entrada.txt", &rows, &cols, &_default_value);
 	if(_default_value == -1){
 		return 0;
 	}
@@ -30,7 +30,7 @@ int main(int argc, char **argv){
 
 	_grid = MATRIX_new(rows, cols);
 
-	UTILS_parse_grid_world(FILENAME, _grid, _default_value);
+	UTILS_parse_grid_world("entrada.txt", _grid, _default_value);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
 			printf("state: %c v: %0.2f ", _grid->matrix[i][j].state,
@@ -44,7 +44,7 @@ int main(int argc, char **argv){
 		Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
 		AGENT_reset(_bebezao, 0);
 	}
-
+	fclose(saida);
 	return 0;
 }
 
@@ -72,9 +72,8 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		//printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
-	fprintf(saida, "Iteração: %d Posição: (%d,%d) Valor: %.2f\n", iterator,row, col, agent->Q[state][action]);
+	fprintf(saida, "Número de iterações: %d\n", iterator);
 }
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
