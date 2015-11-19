@@ -6,18 +6,17 @@
 #include "../include/utils.h"
 #include "../include/agent.h"
 
-#define FILENAME "entrada.txt"
-
 AGENT *_bebezao;
 MATRIX *_grid;
-int cols = 0, rows = 0;
-float default_value = 0.0;
 
 int main(){
 
+	int cols = 0, rows = 0;
+	float default_value = 0.0;
 	int i,j;
-	
-	UTILS_parse_parameters(FILENAME, &rows, &cols, &default_value);
+	char filename[12] = "entrada.txt";
+
+	UTILS_parse_parameters(filename, &rows, &cols, &default_value);
 	if(default_value == -1){
 		return 0;
 	}
@@ -25,7 +24,7 @@ int main(){
 
 	_grid = MATRIX_new(rows, cols);
 
-	UTILS_parse_grid_world(FILENAME, _grid, default_value);
+	UTILS_parse_grid_world(filename, _grid, default_value);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
 			printf("state: %c v: %0.2f ", _grid->matrix[i][j].state,
@@ -35,45 +34,67 @@ int main(){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	AGENT_reset(_bebezao);
+	Q_learning(_bebezao, _grid, 0.2, 0.8, default_value);
 
 	return 0;
 }
-//TODO: colocar while(goal = 1, ou -1)
-void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma){
-	int action;
-	char state, new_state;
-	float reward = 0, maxQ = 0;
 
-	state = world->matrix[agent->posx][agent->posy].state;
-	// recompensa estado atual
-	reward = world->matrix[agent->posx][agent->posy].value;
-	action = choose_action(agent, world, alfa);
-	// depois de escolher a ação, as posições apontam para novo estado
-	new_state = world->matrix[agent->posx][agent->posy].state;
+void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_value){
+	int action, x, y;
+	char state, new_state, best_action;
+	float reward = 0;
 
-	// maxQ = ... melhor recompensa das ações disponíveis no new_state
+    while(reward != 1 || reward != -1){
+        state = world->matrix[agent->posx-1][agent->posy-1].state;
+        x = agent->posx;
+        y = agent->posy;
+        reward = world->matrix[x][y].value;
+        action = choose_action(agent, world, alfa, default_value);
+        printf("acao: %d\n", action);
 
-	//nao sei se o estado vai ser um char ou outra coisa
-	agent->Q[state][action] = (1-alfa) * agent->Q[state][action] + alfa*(reward + gamma * maxQ );
+        AGENT_move(agent, world, action);
+        printf("nova posicao %d %d \n", agent->posx, agent->posy);
+        new_state = world->matrix[agent->posx-1][agent->posy-1].state;
+        best_action = choose_best_action(agent, world, default_value);
+        printf("best action %d \n", best_action);
+        //TODO: arrumar estado
+        agent->Q[state][action] = (1-alfa) * agent->Q[0][action] + alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-
+        printf("posicão: %d, %d - valor Q: %f \n",  x, y, agent->Q[state][action]);
+    }
 }
-int choose_action(AGENT *agent, MATRIX *world, int alfa){
-	int action, i;
-	float max = 0.0;
+
+int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
+    int action = -1000, i;
+    float max = default_value -0.1;
+    for(i=0; i<NOF_ACTIONS; i++){
+        if(AGENT_move(agent, world, i) != -1){
+            if(world->matrix[agent->posx-1][agent->posy-1].value >= max || world->matrix[agent->posx-1][agent->posy-1].value != 0.0){
+                action = i;
+                max = world->matrix[agent->posx-1][agent->posy-1].value;
+                //printf("posicao gerada pelo best action %d %d \n", agent->posx,agent->posy);
+            }
+            AGENT_unmove(agent, world, i);
+        }
+    }
+    return action;
+}
+
+int choose_action(AGENT *agent, MATRIX *world, int alfa, float default_value){
+	int action = -1000, i;
+	float max = default_value -0.1;
 	if ( RAND < alfa){
 		action = rand() % NOF_ACTIONS;
 	}else{
 		for(i=0; i<NOF_ACTIONS; i++){
-			AGENT_move(agent, world, i);
-			// TODO: we need to check if movement is invalid
-			// (move returns -1)
-			if(world->matrix[agent->posx][agent->posy].value > max){
-				action = i;
-				max = world->matrix[agent->posx][agent->posy].value;
+			if(AGENT_move(agent, world, i) != -1){
+                if(world->matrix[agent->posx-1][agent->posy-1].value >= max
+                   && world->matrix[agent->posx-1][agent->posy-1].value != 0.0){
+                    action = i;
+                    max = world->matrix[agent->posx-1][agent->posy-1].value;
+                }
+                AGENT_unmove(agent, world, i);
 			}
-			AGENT_unmove(agent, world, i);
 		}
 	}
 	return action;
@@ -91,7 +112,6 @@ AGENT *AGENT_new(int nof_states) {
 	}
 
 	new_ag->posx = new_ag->posy = 1;
-	new_ag->nof_states = nof_states;
 	return new_ag;
 }
 
@@ -105,7 +125,8 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 			if(AGENT_change_pos(agent, world, (agent->posx - 1),
 						agent->posy) < 0)
 				return -1; // invalid move
-			
+
+
 				break;
 		case RIGHT:
 			if(AGENT_change_pos(agent, world, (agent->posx + 1),
@@ -129,23 +150,18 @@ int AGENT_move(AGENT *agent, MATRIX *world, int action) {
 	return 0;
 }
 
-/*
- * Resets the agent move that was made by <action>. E.G.: if we want to go back
- * on a LEFT action, we should call AGENT_unmove(agent, world, LEFT)
- */
 int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
-	switch(action) {
+    switch(action) {
 		case LEFT:
 			if(AGENT_change_pos(agent, world, (agent->posx + 1),
 						agent->posy) < 0)
 				return -1; // invalid move
-			
+
 				break;
 		case RIGHT:
 			if(AGENT_change_pos(agent, world, (agent->posx - 1),
 						agent->posy) < 0)
 				return -1; // invalid move
-
 				break;
 		case UP:
 			if(AGENT_change_pos(agent, world, agent->posx,
@@ -163,50 +179,23 @@ int AGENT_unmove(AGENT *agent, MATRIX *world, int action) {
 	return 0;
 }
 
-/*
- * Returns -1 if next position (newx, newy) is invalid and does not alter the
- * agent's position.
- * If the movement is valid, update agent's position and returns 0
- */
+
 int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 	// checking boundaries and walls
 	if(MATRIX_out_of_bounds(world, newx, newy) ||
-			AGENT_is_wall( world, newx, newy));
+			AGENT_is_wall( world, newx, newy)){
 			return -1;
-
+			}
 	// changing agent position
 	agent->posx = newx; agent->posy = newy;
-	
+
 	return 0;
 }
 
-/* 
- * Checks if position (newx, newy) is a wall ('X' char). Returns 1 if so, else 0
- */
 int AGENT_is_wall(MATRIX *world, int newx, int newy) {
-	return (world->matrix[newx][newy].state == 'X');
+    if(newx == 0 || newy ==0 )
+        return 0;
+	return (world->matrix[newx-1][newy-1].state == 'X');
 }
 
-/*
- * Resets agent's attributes (position to (1,1), QTable has all of its
- * values set to zero)
- */
-void AGENT_reset(AGENT *agent) {
-	int i;
-	agent->posx = agent->posy = 1;
-	for(i = 0; i < agent->nof_states; i++)
-			memset((void *) agent->Q[i], 0, 
-					NOF_ACTIONS * sizeof(float));
-
-	return;
-}
-
-/* Agent deallocator */
-void AGENT_free(AGENT *agent) {
-	int i;
-	for(i = 0; i < agent->nof_states; i++)
-			free((void *) agent->Q[i]);
-	free((void *) agent->Q);
-	free((void *) agent);
-}
 

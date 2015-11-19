@@ -4,7 +4,7 @@
 #include "../include/matrix.h"
 
 /* Matrix allocator. New matrix of sizes rows x cols */
-MATRIX *MATRIX_new(int rows, int cols) { 
+MATRIX *MATRIX_new(int rows, int cols) {
 	int i;
 	MATRIX *new_mat = (MATRIX *)malloc(sizeof(MATRIX));
 	new_mat->r = rows;
@@ -20,8 +20,7 @@ MATRIX *MATRIX_new(int rows, int cols) {
 
 /* checks if pos (x, y) is out of grid bounds */
 int MATRIX_out_of_bounds(MATRIX *matrix, int x, int y) {
-	return ((x < matrix->c) || (x > matrix->c) || (y < matrix->r) || 
-			(y > matrix->r));
+	return ((x < 1) || (x > matrix->c) || (y < 1) || (y > matrix->r));
 }
 
 /* Matrix deallocator */

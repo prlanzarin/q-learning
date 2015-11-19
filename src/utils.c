@@ -33,9 +33,10 @@ int UTILS_parse_parameters(char *filename, int *rows, int *cols,
 /* Parses the grid world from 'filename' to 'matrix' of type MATRIX */
 int UTILS_parse_grid_world(char *filename, MATRIX *matrix, float default_value) {
 	int row_count = 0;
+	int i;
 	char *buffer, line[256];
 	FILE *file;
-	size_t line_size = sizeof(char) * (2 * matrix->c) + 1;
+	size_t line_size = sizeof(char) * (2 * matrix->c) + 1000;
 
 	if((file = fopen(filename,"r")) == NULL){
 		fprintf(stderr, "ERROR: could not open %s\n", filename);
@@ -53,8 +54,12 @@ int UTILS_parse_grid_world(char *filename, MATRIX *matrix, float default_value) 
 		states_parse(buffer, matrix, row_count);
 		row_count++;
 	}
-	row_count = 0;
+	rewind(file);
+	for(i=0; i<3+row_count; i++){
+        fgets(line, sizeof(line), file);
+    }
 
+	row_count = 0;
 	while((fgets(buffer, line_size, file)) != NULL && row_count < matrix->r) {
 		/* values processing */
 		values_parse(buffer, matrix, row_count, default_value);
@@ -115,17 +120,16 @@ int values_parse(char *buffer, MATRIX *matrix, int row, float default_value) {
 	char *delim = " ";
 	char *tok_buf;
 	int col_count = 0;
-
 	tok_buf = strtok(buffer, delim);
 	while (tok_buf != NULL) {
-		if(tok_buf[0] == 'D'){
+		if(*tok_buf == 'D'){
 			matrix->matrix[row][col_count].value = default_value;
 		}
-		else 
-			matrix->matrix[row][col_count].value = strtof(tok_buf,
-				       	NULL);
+		else
+			matrix->matrix[row][col_count].value = atof(tok_buf);
 		col_count++;
 		tok_buf = strtok(NULL, delim);
 	}
+	 printf("\n");
 	return 0;
 }
