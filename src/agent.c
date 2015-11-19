@@ -46,7 +46,7 @@ void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_
 	int state, new_state;
 	float reward = 0;
 
-	while(reward != 1 || reward != -1){
+	while(reward != default_value || reward != 0)  {
 		state = (agent->posx - 1) * world->r + (agent->posy-1);
 		x = agent->posx;
 		y = agent->posy;
