@@ -56,8 +56,8 @@ int UTILS_parse_grid_world(char *filename, MATRIX *matrix, float default_value) 
 	}
 	rewind(file);
 	for(i=0; i<3+row_count; i++){
-        fgets(line, sizeof(line), file);
-    }
+		fgets(line, sizeof(line), file);
+	}
 
 	row_count = 0;
 	while((fgets(buffer, line_size, file)) != NULL && row_count < matrix->r) {
@@ -130,6 +130,6 @@ int values_parse(char *buffer, MATRIX *matrix, int row, float default_value) {
 		col_count++;
 		tok_buf = strtok(NULL, delim);
 	}
-	 printf("\n");
+	printf("\n");
 	return 0;
 }
