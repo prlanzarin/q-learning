@@ -35,13 +35,13 @@ int main(){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	Q_learning(_bebezao, _grid, 0.2, 0.8, _default_value);
+	Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
 	AGENT_free(_bebezao);
 
 	return 0;
 }
 
-void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float default_value){
+void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsilon, float default_value){
 	int action, best_action, col, row;
 	int state, new_state;
 	float reward = 0;
@@ -51,7 +51,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float defa
 		col = agent->col;
 		row  = agent->row;
 		reward = world->matrix[row][col].value;
-		action = choose_action(agent, world, alfa, default_value);
+		action = choose_action(agent, world, epsilon, default_value);
 		//printf("acao: %d\n", action);
 
 		AGENT_move(agent, world, action);
@@ -63,7 +63,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float defa
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		printf("posicão: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
+		printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
 }
 
@@ -72,7 +72,6 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	float max = default_value -0.1;
 	for(i=0; i<NOF_ACTIONS; i++){
 		if(AGENT_move(agent, world, i) != -1){
-                printf("%d %d\n", agent->row,agent->col);
 			if(world->matrix[agent->row][agent->col].value >= max ||
 					world->matrix[agent->row][agent->col].value != 0.0){
 				action = i;
@@ -85,10 +84,10 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	return action;
 }
 
-int choose_action(AGENT *agent, MATRIX *world, float alfa, float default_value){
+int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_value){
 	int action = -1000, i;
 	float max = default_value -0.1;
-	if ( RAND < alfa){
+	if ( RAND < epsilon){
 		action = rand() % NOF_ACTIONS;
 
 	}else {

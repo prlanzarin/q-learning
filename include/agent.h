@@ -34,7 +34,7 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy);
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value);
 
-void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float default_value);
+void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsilon, float default_value);
 
 void AGENT_reset(AGENT *agent);
 #endif
