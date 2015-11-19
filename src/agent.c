@@ -11,21 +11,21 @@
 AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0;
-float default_value = 0.0;
+float _default_value = 0.0;
 
 int main(){
 
 	int i,j;
 
-	UTILS_parse_parameters(FILENAME, &rows, &cols, &default_value);
-	if(default_value == -1){
+	UTILS_parse_parameters(FILENAME, &rows, &cols, &_default_value);
+	if(_default_value == -1){
 		return 0;
 	}
-	printf("rows: %d cols: %d default value: %f\n", rows, cols, default_value);
+	printf("rows: %d cols: %d default value: %f\n", rows, cols, _default_value);
 
 	_grid = MATRIX_new(rows, cols);
 
-	UTILS_parse_grid_world(FILENAME, _grid, default_value);
+	UTILS_parse_grid_world(FILENAME, _grid, _default_value);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
 			printf("state: %c v: %0.2f ", _grid->matrix[i][j].state,
@@ -35,7 +35,7 @@ int main(){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	Q_learning(_bebezao, _grid, 0.2, 0.8, default_value);
+	Q_learning(_bebezao, _grid, 0.2, 0.8, _default_value);
 	AGENT_free(_bebezao);
 
 	return 0;
