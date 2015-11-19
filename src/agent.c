@@ -46,7 +46,8 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 	int state, new_state;
 	float reward = 0;
 
-	while(reward != default_value || reward != 0)  {
+	while(reward == default_value || reward == 0)  {
+
 		state = (agent->row) * world->r + (agent->col);
 		col = agent->col;
 		row  = agent->row;
@@ -65,6 +66,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 		printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
+	printf("fim");
 }
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
