@@ -37,5 +37,5 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value);
 
 void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsilon, float default_value);
 
-void AGENT_reset(AGENT *agent);
+void AGENT_reset(AGENT *agent, int reset_table);
 #endif

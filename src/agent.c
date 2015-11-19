@@ -13,9 +13,12 @@ MATRIX *_grid;
 int cols = 0, rows = 0;
 float _default_value = 0.0;
 float _alpha, _gamma, _eps;
+FILE *saida;
 
 int main(int argc, char **argv){
 	int i, j;
+	
+	saida= fopen("saida.txt", "wt");
 
 	UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps);
 
@@ -37,8 +40,10 @@ int main(int argc, char **argv){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
-	_bebezao->col = _bebezao->row = 0;
+	for(i = 0;  i < 500; i++) {
+		Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
+		AGENT_reset(_bebezao, 0);
+	}
 
 	return 0;
 }
@@ -47,9 +52,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 	int action, best_action, col, row;
 	int state, new_state, iterator = 0;
 	float reward = 0;
-	FILE *saida;
-	saida= fopen("saida.txt", "wt");
-
+	
 	while(reward == default_value || reward == 0)  {
 
 		state = (agent->row) * world->c + (agent->col);
@@ -69,9 +72,9 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-		fprintf(saida, "Iteração: %d Posição: (%d,%d) Valor: %.2f\n", iterator,row, col, agent->Q[state][action]);
 		//printf("posicao: %d, %d - valor Q: %f \n",  row, col, agent->Q[state][action]);
 	}
+	fprintf(saida, "Iteração: %d Posição: (%d,%d) Valor: %.2f\n", iterator,row, col, agent->Q[state][action]);
 }
 
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
@@ -214,15 +217,16 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy) {
 
 /*
  * Resets agent's attributes (position to (1,1), QTable has all of its
- * values set to zero)
+ * values set to zero if reset_table = 1)
  */
-void AGENT_reset(AGENT *agent) {
+void AGENT_reset(AGENT *agent, int reset_table) {
 	int i;
 	agent->col = agent->row = 0;
-	for(i = 0; i < agent->nof_states; i++)
-		memset((void *) agent->Q[i], 0,
-				NOF_ACTIONS * sizeof(float));
-
+	if(reset_table) {
+		for(i = 0; i < agent->nof_states; i++)
+			memset((void *) agent->Q[i], 0,
+					NOF_ACTIONS * sizeof(float));
+	}
 	return;
 }
 
