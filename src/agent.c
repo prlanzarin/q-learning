@@ -36,7 +36,6 @@ int main(){
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
 	Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
-	AGENT_free(_bebezao);
 
 	return 0;
 }
