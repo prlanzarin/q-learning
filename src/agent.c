@@ -42,12 +42,12 @@ int main(){
 }
 
 void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_value){
-	int action, x, y;
-	char state, new_state, best_action;
+	int action, best_action, x, y;
+	int state, new_state;
 	float reward = 0;
 
 	while(reward != 1 || reward != -1){
-		state = world->matrix[agent->posx-1][agent->posy-1].state;
+		state = (agent->posx - 1) * world->r + (agent->posy-1);
 		x = agent->posx;
 		y = agent->posy;
 		reward = world->matrix[x][y].value;
@@ -56,7 +56,7 @@ void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_
 
 		AGENT_move(agent, world, action);
 		printf("nova posicao %d %d \n", agent->posx, agent->posy);
-		new_state = world->matrix[agent->posx-1][agent->posy-1].state;
+		new_state = (agent->posx - 1) * world->r + (agent->posy-1);
 		best_action = choose_best_action(agent, world, default_value);
 		printf("best action %d \n", best_action);
 		//TODO: arrumar estado
