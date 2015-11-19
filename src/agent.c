@@ -6,17 +6,18 @@
 #include "../include/utils.h"
 #include "../include/agent.h"
 
+#define FILENAME "entrada.txt"
+
 AGENT *_bebezao;
 MATRIX *_grid;
+int cols = 0, rows = 0;
+float default_value = 0.0;
 
 int main(){
 
-	int cols = 0, rows = 0;
-	float default_value = 0.0;
 	int i,j;
-	char filename[12] = "entrada.txt";
 
-	UTILS_parse_parameters(filename, &rows, &cols, &default_value);
+	UTILS_parse_parameters(FILENAME, &rows, &cols, &default_value);
 	if(default_value == -1){
 		return 0;
 	}
@@ -24,7 +25,7 @@ int main(){
 
 	_grid = MATRIX_new(rows, cols);
 
-	UTILS_parse_grid_world(filename, _grid, default_value);
+	UTILS_parse_grid_world(FILENAME, _grid, default_value);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
 			printf("state: %c v: %0.2f ", _grid->matrix[i][j].state,
@@ -198,4 +199,26 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy) {
 	return (world->matrix[newx-1][newy-1].state == 'X');
 }
 
+/*
+ * Resets agent's attributes (position to (1,1), QTable has all of its
+ * values set to zero)
+ */
+void AGENT_reset(AGENT *agent) {
+	int i;
+	agent->posx = agent->posy = 1;
+	for(i = 0; i < agent->nof_states; i++)
+			memset((void *) agent->Q[i], 0, 
+					NOF_ACTIONS * sizeof(float));
+
+	return;
+}
+
+/* Agent deallocator */
+void AGENT_free(AGENT *agent) {
+	int i;
+	for(i = 0; i < agent->nof_states; i++)
+			free((void *) agent->Q[i]);
+	free((void *) agent->Q);
+	free((void *) agent);
+}
 

@@ -14,6 +14,7 @@ typedef enum action {
 
 typedef struct agent_st {
         float **Q;
+        int nof_states;
         int posx, posy;
 } AGENT;
 
@@ -34,4 +35,6 @@ int AGENT_is_wall(MATRIX *world, int newx, int newy);
 int choose_best_action(AGENT *agent, MATRIX *world, float default_value);
 
 void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_value);
+
+void AGENT_reset(AGENT *agent);
 #endif
