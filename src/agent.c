@@ -35,13 +35,13 @@ int main(){
 	}
 
 	_bebezao = AGENT_new(_grid->r * _grid->c);
-	Q_learning(_bebezao, _grid, 0.2, 0.8, _default_value);
+	Q_learning(_bebezao, _grid, 0.5, 0.8, _default_value);
 	AGENT_free(_bebezao);
 
 	return 0;
 }
 
-void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_value){
+void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float default_value){
 	int action, best_action, x, y;
 	int state, new_state;
 	float reward = 0;
@@ -60,7 +60,7 @@ void Q_learning(AGENT *agent, MATRIX *world, int alfa, int gamma, float default_
 		best_action = choose_best_action(agent, world, default_value);
 		printf("best action %d \n", best_action);
 		//TODO: arrumar estado
-		agent->Q[state][action] = (1-alfa) * agent->Q[0][action] + 
+		agent->Q[state][action] = (1-alfa) * agent->Q[0][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
 		printf("posicão: %d, %d - valor Q: %f \n",  x, y, agent->Q[state][action]);
@@ -72,7 +72,7 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	float max = default_value -0.1;
 	for(i=0; i<NOF_ACTIONS; i++){
 		if(AGENT_move(agent, world, i) != -1){
-			if(world->matrix[agent->posx-1][agent->posy-1].value >= max || 
+			if(world->matrix[agent->posx-1][agent->posy-1].value >= max ||
 					world->matrix[agent->posx-1][agent->posy-1].value != 0.0){
 				action = i;
 				max = world->matrix[agent->posx-1][agent->posy-1].value;
@@ -84,13 +84,13 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 	return action;
 }
 
-int choose_action(AGENT *agent, MATRIX *world, int alfa, float default_value){
+int choose_action(AGENT *agent, MATRIX *world, float alfa, float default_value){
 	int action = -1000, i;
 	float max = default_value -0.1;
-	if ( RAND < alfa)
+	if ( RAND < alfa){
 		action = rand() % NOF_ACTIONS;
-	
-	else {
+
+	}else {
 		for(i=0; i<NOF_ACTIONS; i++){
 			if(AGENT_move(agent, world, i) != -1) {
 				if(world->matrix[agent->posx-1][agent->posy-1].value >= max
@@ -211,7 +211,7 @@ void AGENT_reset(AGENT *agent) {
 	int i;
 	agent->posx = agent->posy = 1;
 	for(i = 0; i < agent->nof_states; i++)
-		memset((void *) agent->Q[i], 0, 
+		memset((void *) agent->Q[i], 0,
 				NOF_ACTIONS * sizeof(float));
 
 	return;
