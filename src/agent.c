@@ -205,9 +205,9 @@ int AGENT_change_pos(AGENT *agent, MATRIX *world, int newx, int newy) {
 }
 
 int AGENT_is_wall(MATRIX *world, int newx, int newy) {
-	if(newx < 0 || newy < 0 || newx >= rows || newy >= cols)
+	if(newx < 0 || newy < 0 || newx >= cols|| newy >= rows)
 		return 0;
-	return (world->matrix[newx][newy].state == 'X');
+	return (world->matrix[newy][newx].state == 'X');
 }
 
 /*
