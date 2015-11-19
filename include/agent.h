@@ -15,7 +15,7 @@ typedef enum action {
 typedef struct agent_st {
         float **Q;
         int nof_states;
-        int posx, posy;
+        int col, row;
 } AGENT;
 
 AGENT *AGENT_new(int nof_states);
