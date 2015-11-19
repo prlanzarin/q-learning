@@ -17,7 +17,7 @@ FILE *saida;
 
 int main(int argc, char **argv){
 	int i, j;
-	
+
 	saida= fopen("saida.txt", "wt");
 
 	//UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps, &_trainings);
@@ -42,6 +42,7 @@ int main(int argc, char **argv){
 	_bebezao = AGENT_new(_grid->r * _grid->c);
 	for(i = 0;  i < 500; i++) {
 		Q_learning(_bebezao, _grid, 0.7, 0.8, 0.2, _default_value);
+		fprintf(saida, "Fim da rodada \n\n");
 		AGENT_reset(_bebezao, 0);
 	}
 	fclose(saida);
@@ -52,7 +53,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 	int action, best_action, col, row;
 	int state, new_state, iterator = 0;
 	float reward = 0;
-	
+
 	while(reward == default_value || reward == 0)  {
 
 		state = (agent->row) * world->c + (agent->col);
@@ -70,6 +71,7 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		//printf("best action %d \n", best_action);
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
+        fprintf(saida, "Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
 
 	}
 	fprintf(saida, "Número de iterações: %d\n", iterator);

@@ -1,9 +1,18 @@
-L=3
-C=4
+L=7
+C=10
 D=-0.04
-. . . .
-. X . .
-. . . .
-D D D +1.0
-D X D -1.0
-D D D D
+. . . . . . . . . .
+. . . . . . . . . .
+. X . . . . . . . .
+. . . . . . . . . .
+. . . . . . . . . .
+. X . . . . . . . .
+. . . . . . . . . .
+. . . . . . . . . .
+D D D D D D D D D D
+D X D D D D D D D D
+D D D D D D D D D +1.0
+D D D D D D D D D D
+D X D D D D D D D D
+D D D D D D D D D D
+D D D D D D D D D D
