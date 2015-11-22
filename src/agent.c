@@ -12,7 +12,7 @@ AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0, _trainings = 100;
 float _default_value = 0.0;
-float _alpha = 0.7, _gamma = 0.8, _eps = 0.2;
+float _alpha = 0.7, _gamma = 1, _eps = 1;
 FILE *saida;
 
 int main(int argc, char **argv){
@@ -23,7 +23,7 @@ int main(int argc, char **argv){
 	if(argc > 1)
 		UTILS_parse_args(argc, argv, &_alpha, &_gamma, &_eps, &_trainings);
 
-	UTILS_parse_parameters("entrada.txt", &rows, &cols, &_default_value);
+	UTILS_parse_parameters("C_bigMaze-gamma_1.0.txt", &rows, &cols, &_default_value);
 	if(_default_value == -1){
 		return 0;
 	}
@@ -45,6 +45,7 @@ int main(int argc, char **argv){
 		Q_learning(_bebezao, _grid, _alpha, _gamma, _eps, _default_value);
 		fprintf(saida, "Fim da rodada \n\n");
 		AGENT_reset(_bebezao, 0, _grid->r -1, 0);
+		_eps = _eps * 0.9;
 	}
 	fclose(saida);
 	return 0;
@@ -62,18 +63,18 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		row  = agent->row;
 		reward = world->matrix[row][col].value;
 		action = choose_action(agent, world, epsilon, default_value);
-		//printf("acao: %d\n", action);
 
-		AGENT_move(agent, world, action);
-		//printf("nova posicao %d %d \n", agent->row, agent->col);
+		if(AGENT_move(agent, world, action) == -1){
+            agent->Q[new_state][action] = 0;
+            AGENT_unmove(agent, world, action);
+            AGENT_move(agent, world, STAY);
+		}
 		new_state = (agent->row) * world->c + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
-		//printf("best action %d \n", best_action);
 		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
 			alfa*(reward + gamma * agent->Q[new_state][best_action]);
 
-        printf("Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
-	sleep(0.5);
+      //  printf("Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
 	}
 	fprintf(saida, "Número de iterações: %d\n", iterator);
 }
@@ -90,7 +91,6 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 					agent->Q[state][i] != 0.0){
 				action = i;
 				max = agent->Q[state][action];
-				//printf("posicao gerada pelo best action %d %d \n", agent->row ,agent->col);
 			}
 			AGENT_unmove(agent, world, i);
 		}
@@ -101,7 +101,30 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_value){
 	int action = -1000, i, state;
 	float max = 0.0;
-	{
+
+	if ( RAND < (1 - epsilon)) {
+        action = rand() % NOF_ACTIONS;
+
+        if( RAND > 0.8){
+            switch(action) {
+                case LEFT:
+                case RIGHT:
+                    if(RAND <= 0.5)
+                        action = UP;
+                    else
+                        action = DOWN;
+                    break;
+                case UP:
+                case DOWN:
+                    if(RAND <= 0.5)
+                        action = LEFT;
+                    else
+                        action = RIGHT;
+                    break;
+            }
+        }
+
+	}else{
 		for(i=0; i<NOF_ACTIONS; i++){
 			if(AGENT_move(agent, world, i) != -1) {
 				state = (agent->row) * world->c + (agent->col);
@@ -114,31 +137,6 @@ int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_valu
 				AGENT_unmove(agent, world, i);
 			}
 		}
-	}
-	float randi;
-	if ( (randi = RAND) < epsilon) {
-		switch(action) {
-			case LEFT:
-			case RIGHT:
-				if(RAND <= 0.5)
-					action = UP;	
-				else
-					action = DOWN;
-				break;
-			case UP:
-			case DOWN:
-				if(RAND <= 0.5)
-					action = LEFT;	
-				else
-					action = RIGHT;
-				break;
-
-		}
-		if(AGENT_move(agent, world, action) == -1)
-			return STAY;
-
-		AGENT_unmove(agent, world, action);
-
 	}
 
 	return action;
