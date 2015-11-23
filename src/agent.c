@@ -66,21 +66,21 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 
 		if(AGENT_move(agent, world, action) == -1){
             printf("aqiiiiii\n");
-            agent->Q[new_state][action] = -100;
+            agent->Q[state][action] = -100;
             AGENT_unmove(agent, world, action);
             AGENT_move(agent, world, STAY);
 		}
 		new_state = (agent->row) * world->c + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
 		printf("coordenadas escolhidas para proximo estado %d %d\n", agent->row, agent->col);
-		printf("valor novo estado %f\n", agent->Q[new_state][action]);
+		printf("valor novo estado %f estado: %d acao %d\n", agent->Q[new_state][action], new_state, action);
         printf("valor recompensa %f\n", reward);
         printf("valor melhor acao %f\n", agent->Q[new_state][best_action]);
 
-		agent->Q[state][action] = ((1-alfa) * agent->Q[new_state][action]) +
+		agent->Q[state][action] = ((1-alfa) * agent->Q[state][action]) +
 			(alfa*(reward + (gamma * agent->Q[new_state][best_action])));
 
-        printf("valor total %f\n", agent->Q[state][action]);
+        printf("valor total %f estado: %d acao %d\n", agent->Q[state][action], state, action);
 
       //  printf("Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
 	}
@@ -110,9 +110,9 @@ int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_valu
 	int action = -1000, i, state;
 	float max = 0.0;
 
-	if ( RAND < (1 - epsilon)) {
+	if ( RAND < epsilon) {
         action = rand() % NOF_ACTIONS;
-
+        printf("aquiii\n\n");
         if( RAND > 0.8){
             switch(action) {
                 case LEFT:
