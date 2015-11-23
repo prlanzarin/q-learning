@@ -12,7 +12,7 @@ AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0, _trainings = 100;
 float _default_value = 0.0;
-float _alpha = 0.7, _gamma = 1, _eps = 1;
+float _alpha = 0.9, _gamma = 1, _eps = 1;
 FILE *saida;
 
 int main(int argc, char **argv){
@@ -34,7 +34,7 @@ int main(int argc, char **argv){
 	UTILS_parse_grid_world("entrada.txt", _grid, _default_value);
 	for(i=0; i<rows; i++){
 		for(j=0; j<cols; j++){
-			printf("state: %c v: %0.2f ", _grid->matrix[i][j].state,
+			printf("%c:%0.2f ", _grid->matrix[i][j].state,
 					_grid->matrix[i][j].value);
 		}
 		printf("\n");
@@ -65,14 +65,22 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 		action = choose_action(agent, world, epsilon, default_value);
 
 		if(AGENT_move(agent, world, action) == -1){
-            agent->Q[new_state][action] = 0;
+            printf("aqiiiiii\n");
+            agent->Q[new_state][action] = -100;
             AGENT_unmove(agent, world, action);
             AGENT_move(agent, world, STAY);
 		}
 		new_state = (agent->row) * world->c + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
-		agent->Q[state][action] = (1-alfa) * agent->Q[new_state][action] +
-			alfa*(reward + gamma * agent->Q[new_state][best_action]);
+		printf("coordenadas escolhidas para proximo estado %d %d\n", agent->row, agent->col);
+		printf("valor novo estado %f\n", agent->Q[new_state][action]);
+        printf("valor recompensa %f\n", reward);
+        printf("valor melhor acao %f\n", agent->Q[new_state][best_action]);
+
+		agent->Q[state][action] = ((1-alfa) * agent->Q[new_state][action]) +
+			(alfa*(reward + (gamma * agent->Q[new_state][best_action])));
+
+        printf("valor total %f\n", agent->Q[state][action]);
 
       //  printf("Posicao: (%d, %d) Valor: %.2f\n", row, col,agent->Q[state][action]);
 	}

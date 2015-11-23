@@ -1,0 +1,29 @@
+L=6
+
+C=8
+
+D=-0.01
+
+. . . . . . . .
+
+. . X . X X X .
+
+. . X . . . . .
+
+. . X . X X . .
+
+. . X . X . . .
+
+. . X . X . . .
+
+D D D D D D D +7
+
+D D X D X X X D
+
+D D X D D D D D
+
+D D X +1 X X D D
+
+D D X D X +10 D D
+
+D D X D X D D D
