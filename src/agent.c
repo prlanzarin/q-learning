@@ -12,7 +12,7 @@ AGENT *_bebezao;
 MATRIX *_grid;
 int cols = 0, rows = 0, _trainings = 1000;
 float _default_value = 0.0;
-float _alpha = 0.9, _gamma = 1.0, _eps = 0.8;
+float _alpha = 0.9, _gamma = 1.0, _eps = 0.9;
 FILE *saida;
 
 int main(int argc, char **argv){
@@ -47,7 +47,8 @@ int main(int argc, char **argv){
 		printf("Fim da rodada \n\n");
 		//sleep(1);
 		AGENT_reset(_bebezao, 0, _grid->r -1, 0);
-		_eps = _eps * 0.9999;
+		_eps = _eps * 0.99;
+		printf("iteration eps is %f \n", _eps);
 	}
 	fclose(saida);
 	return 0;
@@ -60,12 +61,13 @@ void Q_learning(AGENT *agent, MATRIX *world, float alfa, float gamma, float epsi
 	while(reward == default_value || reward == 0)  {
 
 		STATE = (agent->row) * world->c + (agent->col);
-		col = agent->col;
-		row  = agent->row;
-		reward = world->matrix[row][col].value;
 		action = choose_action(agent, world, epsilon, default_value);
 	
 		AGENT_move(agent, world, action);
+		col = agent->col;
+		row  = agent->row;
+		reward = world->matrix[row][col].value;
+
 		NEW_STATE = (agent->row) * world->c + (agent->col);
 		best_action = choose_best_action(agent, world, default_value);
 		//printf("CHOSEN ACTION %d CHOSEN BEST ACTION %d \n", action, best_action);
@@ -111,7 +113,7 @@ int choose_best_action(AGENT *agent, MATRIX *world, float default_value){
 int choose_action(AGENT *agent, MATRIX *world, float epsilon, float default_value){
 	int action;
 
-	if ( RAND < (1.0-epsilon)) {
+	if ( RAND < (epsilon)) {
 		action = rand() % NOF_ACTIONS;
 		if( RAND > 0.8){
 			switch(action) {
