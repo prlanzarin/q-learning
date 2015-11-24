@@ -10,7 +10,7 @@
 
 AGENT *_bebezao;
 MATRIX *_grid;
-int cols = 0, rows = 0, _trainings = 1000;
+int cols = 0, rows = 0, _trainings = 500;
 float _default_value = 0.0;
 float _alpha = 0.9, _gamma = 1.0, _eps = 0.9;
 FILE *saida;
